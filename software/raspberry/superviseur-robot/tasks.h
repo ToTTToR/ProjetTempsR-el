@@ -65,6 +65,7 @@ private:
     ComMonitor monitor;
     ComRobot robot;
     int robotStarted = 0;
+    int robotComStarted = 0;
     int move = MESSAGE_ROBOT_STOP;
     
     /**********************************************************************/
@@ -72,13 +73,16 @@ private:
     /**********************************************************************/
     RT_TASK th_server;
     RT_TASK th_sendToMon;
+    RT_TASK th_sendToRobot;
     RT_TASK th_receiveFromMon;
     RT_TASK th_openComRobot;
+    RT_TASK th_closeComRobot;
     RT_TASK th_startWithoutWDRobot;
     RT_TASK th_startWithWDRobot;
     RT_TASK th_move;
     RT_TASK th_battery;
     RT_TASK th_reloadWD;
+    RT_TASK th_surveillanceRobot;
     
     /**********************************************************************/
     /* Mutex                                                              */
@@ -87,21 +91,26 @@ private:
     RT_MUTEX mutex_robot;
     RT_MUTEX mutex_robotStarted;
     RT_MUTEX mutex_move;
+    RT_MUTEX mutex_robotComStarted;
 
     /**********************************************************************/
     /* Semaphores                                                         */
     /**********************************************************************/
     RT_SEM sem_barrier;
     RT_SEM sem_openComRobot;
+    RT_SEM sem_closeComRobot;
     RT_SEM sem_serverOk;
     RT_SEM sem_startRobot;
     RT_SEM sem_startRobotWD;
+    RT_SEM sem_surveillanceRobot;
+    RT_SEM sem_reloadWD;
 
     /**********************************************************************/
     /* Message queues                                                     */
     /**********************************************************************/
     int MSG_QUEUE_SIZE;
     RT_QUEUE q_messageToMon;
+    RT_QUEUE q_messageToRobot;
     
     /**********************************************************************/
     /* Tasks' functions                                                   */
@@ -115,6 +124,11 @@ private:
      * @brief Thread sending data to monitor.
      */
     void SendToMonTask(void *arg);
+    
+    /**
+     * @brief Thread sending data to robot.
+     */
+    void SendToRobotTask(void *arg);
         
     /**
      * @brief Thread receiving data from monitor.
@@ -126,6 +140,12 @@ private:
      */
     void OpenComRobot(void *arg);
 
+    /**
+     * @brief Thread closing communication with the robot.
+     */
+    void CloseComRobot(void *arg);
+    
+    
     /**
      * @brief Thread starting the communication with the robot.
      */
@@ -150,7 +170,11 @@ private:
      * @brief Thread handling control of the robot.
      */
     void BatteryTask(void *arg);  
-    
+        
+    /**
+     * @brief Thread handling surveillance with the robot.
+     */
+    void SurveillanceRobotTask(void *arg);  
     /**********************************************************************/
     /* Queue services                                                     */
     /**********************************************************************/
